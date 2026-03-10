@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoGrader AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <div class="app">
+
+    <header class="header">
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L24 8V20L14 26L4 20V8L14 2Z" stroke="url(#grad)" stroke-width="1.5" fill="none"/>
+            <path d="M14 7L19 10V16L14 19L9 16V10L14 7Z" fill="url(#grad)" opacity="0.6"/>
+            <defs>
+              <linearGradient id="grad" x1="4" y1="2" x2="24" y2="26" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <div class="logo">AutoGrader <span class="logo-ai">AI</span></div>
+          <div class="tagline">Intelligent Assignment Evaluation</div>
+        </div>
+      </div>
+      <div class="header-badge">Powered by Llama 3</div>
+    </header>
+
+    <div class="section-label">01 — Upload Files</div>
+    <div class="grid">
+
+      <div class="upload-card" id="rubricZone">
+        <input type="file" id="rubricInput" accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+        <div class="upload-icon-wrap"><div class="upload-icon">📋</div></div>
+        <div class="upload-card-title">Rubric</div>
+        <div class="upload-card-hint" id="rubricHint">Drop your rubric here or<br/><span class="hint-link">browse files</span></div>
+        <div class="upload-formats">.pdf · .txt · .md · and more</div>
+        <div class="file-pill hidden" id="rubricPill">
+          <span class="pill-icon">📄</span>
+          <span id="rubricName"></span>
+          <button id="rubricRemove" class="pill-remove">✕</button>
+        </div>
+      </div>
+
+      <div class="upload-card" id="workZone">
+        <input type="file" id="workInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+        <div class="upload-icon-wrap"><div class="upload-icon">📝</div></div>
+        <div class="upload-card-title">Student Work</div>
+        <div id="workEmpty">
+          <div class="upload-card-hint">Drop files here or<br/><span class="hint-link">browse files</span></div>
+          <div class="upload-formats">.pdf · .py · .js · .java · .txt · etc.</div>
+        </div>
+        <div id="workFileArea" class="hidden">
+          <div id="workList" class="work-files"></div>
+          <button class="add-more-btn" id="addMoreBtn">
+            <input type="file" id="addMoreInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+            <span>+ Add more files</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="grade-wrap">
+      <button class="grade-btn" id="gradeBtn" disabled>
+        <span class="grade-btn-text">Grade Submission</span>
+        <span class="grade-btn-icon">→</span>
+      </button>
+      <div class="grade-hint" id="gradeHint">Upload both files to enable grading</div>
+    </div>
+
+    <div class="status-bar hidden" id="statusBar">
+      <div class="status-inner">
+        <div class="spinner" id="spinner"></div>
+        <span id="statusText"></span>
+      </div>
+    </div>
+
+    <div class="error-card hidden" id="errorBox">
+      <span class="error-icon">⚠</span>
+      <span id="errorText"></span>
+    </div>
+
+    <div class="loading-card hidden" id="loadingBox">
+      <div class="loading-steps">
+        <div class="loading-step"><div class="step-dot active"></div><span>Reading rubric</span></div>
+        <div class="loading-step"><div class="step-dot"></div><span>Evaluating student work</span></div>
+        <div class="loading-step"><div class="step-dot"></div><span>Generating feedback</span></div>
+      </div>
+    </div>
+
+    <div class="results-card hidden" id="resultsBox">
+
+      <div class="score-hero">
+        <div class="score-ring-wrap">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="url(#scoreGrad)" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="326.7" id="scoreArc"
+              style="transform:rotate(-90deg);transform-origin:60px 60px;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
+            <defs>
+              <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-inner">
+            <div class="score-number" id="scoreDisplay">0</div>
+            <div class="score-label">/ 100</div>
+          </div>
+        </div>
+        <div class="score-details">
+          <div class="letter-grade" id="letterGrade">—</div>
+          <div class="score-title">Evaluation Complete</div>
+          <div class="score-subtitle" id="scoreSubtitle"></div>
+        </div>
+      </div>
+
+      <div class="results-body">
+
+        <div class="result-section" id="criteriaSection">
+          <div class="result-section-title"><span class="section-num">01</span> Rubric Breakdown</div>
+          <div id="criteriaList" class="criteria-list"></div>
+        </div>
+
+        <div class="two-col">
+          <div class="result-section" id="strengthsSection">
+            <div class="result-section-title"><span class="section-num">02</span> Strengths</div>
+            <p class="result-text" id="strengthsText"></p>
+          </div>
+          <div class="result-section" id="improvementsSection">
+            <div class="result-section-title"><span class="section-num">03</span> Improvements</div>
+            <p class="result-text" id="improvementsText"></p>
+          </div>
+        </div>
+
+        <div class="result-section" id="summarySection">
+          <div class="result-section-title"><span class="section-num">04</span> Summary</div>
+          <p class="result-text result-summary" id="summaryText"></p>
+        </div>
+
+        <button class="grade-again-btn" id="gradeAgainBtn">↺ Grade Another Submission</button>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/main.js"></script>
+</body>
+</html>
