@@ -104,7 +104,7 @@ Respond ONLY with a JSON object in this exact format (no markdown, no backticks)
     }
 
     payload = {
-        "model": "llama3-70b-8192",
+        "model": "llama-3.3-70b-versatile",
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": 1500,
         "temperature": 0.2,
