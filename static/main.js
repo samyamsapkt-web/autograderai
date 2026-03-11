@@ -3,30 +3,32 @@ let rubricFile = null;
 let workFiles  = [];
 
 /* ── DOM refs ── */
-const rubricInput    = document.getElementById("rubricInput");
-const rubricZone     = document.getElementById("rubricZone");
-const rubricHint     = document.getElementById("rubricHint");
-const rubricPill     = document.getElementById("rubricPill");
-const rubricName     = document.getElementById("rubricName");
-const rubricRemove   = document.getElementById("rubricRemove");
+const rubricInput         = document.getElementById("rubricInput");
+const rubricZone          = document.getElementById("rubricZone");
+const rubricHint          = document.getElementById("rubricHint");
+const rubricPill          = document.getElementById("rubricPill");
+const rubricName          = document.getElementById("rubricName");
+const rubricRemove        = document.getElementById("rubricRemove");
 
-const workZone       = document.getElementById("workZone");
-const workInput      = document.getElementById("workInput");
-const workEmpty      = document.getElementById("workEmpty");
-const workFileArea   = document.getElementById("workFileArea");
-const workList       = document.getElementById("workList");
-const addMoreBtn     = document.getElementById("addMoreBtn");
-const addMoreInput   = document.getElementById("addMoreInput");
+const workZone            = document.getElementById("workZone");
+const workInput           = document.getElementById("workInput");
+const workEmpty           = document.getElementById("workEmpty");
+const workFileArea        = document.getElementById("workFileArea");
+const workList            = document.getElementById("workList");
+const addMoreBtn          = document.getElementById("addMoreBtn");
+const addMoreInput        = document.getElementById("addMoreInput");
 
-const gradeBtn       = document.getElementById("gradeBtn");
-const gradeHint      = document.getElementById("gradeHint");
-const statusBar      = document.getElementById("statusBar");
-const statusText     = document.getElementById("statusText");
-const errorBox       = document.getElementById("errorBox");
-const errorText      = document.getElementById("errorText");
-const loadingBox     = document.getElementById("loadingBox");
-const resultsBox     = document.getElementById("resultsBox");
-const gradeAgainBtn  = document.getElementById("gradeAgainBtn");
+const specialInstructions = document.getElementById("specialInstructions");
+
+const gradeBtn            = document.getElementById("gradeBtn");
+const gradeHint           = document.getElementById("gradeHint");
+const statusBar           = document.getElementById("statusBar");
+const statusText          = document.getElementById("statusText");
+const errorBox            = document.getElementById("errorBox");
+const errorText           = document.getElementById("errorText");
+const loadingBox          = document.getElementById("loadingBox");
+const resultsBox          = document.getElementById("resultsBox");
+const gradeAgainBtn       = document.getElementById("gradeAgainBtn");
 
 /* ── Helpers ── */
 function updateGradeBtn() {
@@ -156,7 +158,6 @@ function animateScore(score) {
   const offset = circumference - (score / 100) * circumference;
   arc.style.strokeDashoffset = offset;
 
-  // Animate number
   const numEl = document.getElementById("scoreDisplay");
   let current = 0;
   const step = score / 60;
@@ -169,19 +170,14 @@ function animateScore(score) {
 
 /* ── Render results ── */
 function renderResults(data) {
-  // Score ring
   setTimeout(() => animateScore(data.score || 0), 100);
 
-  // Letter grade colour
-  const letterEl = document.getElementById("letterGrade");
-  letterEl.textContent = data.letter || "—";
+  document.getElementById("letterGrade").textContent = data.letter || "—";
 
-  // Subtitle
   const score = data.score || 0;
   const subtitle = score >= 90 ? "Excellent work" : score >= 80 ? "Good performance" : score >= 70 ? "Satisfactory" : score >= 60 ? "Needs improvement" : "Significant work needed";
   document.getElementById("scoreSubtitle").textContent = subtitle;
 
-  // Criteria
   const criteriaList = document.getElementById("criteriaList");
   criteriaList.innerHTML = "";
   if (Array.isArray(data.criteria) && data.criteria.length) {
@@ -200,7 +196,6 @@ function renderResults(data) {
     });
   }
 
-  // Text sections
   [
     ["strengthsText",    "strengthsSection",   data.strengths],
     ["improvementsText", "improvementsSection", data.improvements],
@@ -227,7 +222,6 @@ gradeBtn.addEventListener("click", async () => {
   resultsBox.classList.add("hidden");
   setStatus("Analyzing submission with AI...");
 
-  // Reset step dots
   loadingBox.querySelectorAll(".step-dot").forEach(d => {
     d.classList.remove("active", "done");
   });
@@ -237,6 +231,12 @@ gradeBtn.addEventListener("click", async () => {
     const form = new FormData();
     form.append("rubric", rubricFile, rubricFile.name);
     workFiles.forEach(f => form.append("work_files", f, f.name));
+
+    // Append special instructions if provided
+    const instructions = specialInstructions.value.trim();
+    if (instructions) {
+      form.append("special_instructions", instructions);
+    }
 
     const resp = await fetch("/grade", { method: "POST", body: form });
     const json = await resp.json();
@@ -268,5 +268,6 @@ gradeAgainBtn.addEventListener("click", () => {
   clearRubric();
   workFiles = [];
   renderWorkList();
+  specialInstructions.value = "";
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
