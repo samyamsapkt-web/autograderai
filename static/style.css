@@ -532,3 +532,53 @@ body {
 
 /* ── Utility ── */
 .hidden { display: none !important; }
+
+/* ── Special Instructions ── */
+.optional-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+
+.instructions-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+  animation: fadeUp 0.6s ease 0.25s both;
+}
+
+.instructions-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius: 14px;
+  padding: 16px 20px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  backdrop-filter: blur(12px);
+  min-height: 90px;
+}
+.instructions-input:focus {
+  border-color: var(--indigo);
+  background: var(--surface2);
+}
+.instructions-input::placeholder { color: var(--muted); }
+
+.instructions-hint {
+  font-size: 11px;
+  color: var(--muted);
+  padding-left: 4px;
+}
