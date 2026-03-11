@@ -74,6 +74,19 @@
 
     </div>
 
+    <!-- SPECIAL INSTRUCTIONS -->
+    <div class="section-label" style="margin-top:24px;">02 — Special Instructions <span class="optional-tag">Optional</span></div>
+    <div class="instructions-wrap">
+      <textarea
+        id="specialInstructions"
+        class="instructions-input"
+        placeholder="Add any grading notes or exceptions... e.g. 'If the student has the correct answer but not exact wording from the answer key, still give full marks' or 'Be lenient on spelling, focus on content only'"
+        rows="3"
+      ></textarea>
+      <div class="instructions-hint">These instructions will guide the AI when grading the submission.</div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px;">03 — Grade</div>
     <div class="grade-wrap">
       <button class="grade-btn" id="gradeBtn" disabled>
         <span class="grade-btn-text">Grade Submission</span>
@@ -84,7 +97,7 @@
 
     <div class="status-bar hidden" id="statusBar">
       <div class="status-inner">
-        <div class="spinner" id="spinner"></div>
+        <div class="spinner"></div>
         <span id="statusText"></span>
       </div>
     </div>
