@@ -50,6 +50,7 @@ def grade():
     if not GROQ_API_KEY:
         return jsonify({"error": "Server is missing GROQ_API_KEY environment variable."}), 500
 
+    # --- Rubric ---
     rubric_file = request.files.get("rubric")
     if not rubric_file:
         return jsonify({"error": "No rubric file provided."}), 400
@@ -58,6 +59,7 @@ def grade():
     except ValueError as e:
         return jsonify({"error": str(e)}), 422
 
+    # --- Student work files ---
     work_uploads = request.files.getlist("work_files")
     if not work_uploads:
         return jsonify({"error": "No student work files provided."}), 400
@@ -72,11 +74,18 @@ def grade():
 
     work_block = "\n\n".join(work_blocks)
 
+    # --- Special instructions (optional) ---
+    special_instructions = request.form.get("special_instructions", "").strip()
+    instructions_block = ""
+    if special_instructions:
+        instructions_block = f"\nSPECIAL INSTRUCTIONS FROM TEACHER:\n{special_instructions}\n"
+
+    # --- Build prompt ---
     prompt = f"""You are an expert autograder. Grade the student's work based on the rubric provided.
 
 RUBRIC:
 {rubric_text}
-
+{instructions_block}
 STUDENT WORK:
 {work_block}
 
