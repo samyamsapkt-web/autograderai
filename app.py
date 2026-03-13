@@ -74,6 +74,12 @@ def grade():
 
     work_block = "\n\n".join(work_blocks)
 
+    # --- Grade level (optional) ---
+    grade_level = request.form.get("grade_level", "").strip()
+    grade_block = ""
+    if grade_level:
+        grade_block = f"\nGRADE LEVEL: Grade {grade_level}. Evaluate this work strictly based on the expected abilities, writing level, and knowledge of a typical Grade {grade_level} student. Hold them to Grade {grade_level} standards — not higher, not lower.\n"
+
     # --- Special instructions (optional) ---
     special_instructions = request.form.get("special_instructions", "").strip()
     instructions_block = ""
@@ -82,10 +88,10 @@ def grade():
 
     # --- Build prompt ---
     prompt = f"""You are an expert autograder. Grade the student's work based on the rubric provided.
-
+{grade_block}{instructions_block}
 RUBRIC:
 {rubric_text}
-{instructions_block}
+
 STUDENT WORK:
 {work_block}
 
