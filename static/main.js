@@ -1,6 +1,7 @@
 /* ── State ── */
-let rubricFile = null;
-let workFiles  = [];
+let rubricFile    = null;
+let workFiles     = [];
+let selectedGrade = null;
 
 /* ── DOM refs ── */
 const rubricInput         = document.getElementById("rubricInput");
@@ -15,7 +16,6 @@ const workInput           = document.getElementById("workInput");
 const workEmpty           = document.getElementById("workEmpty");
 const workFileArea        = document.getElementById("workFileArea");
 const workList            = document.getElementById("workList");
-const addMoreBtn          = document.getElementById("addMoreBtn");
 const addMoreInput        = document.getElementById("addMoreInput");
 
 const specialInstructions = document.getElementById("specialInstructions");
@@ -30,12 +30,21 @@ const loadingBox          = document.getElementById("loadingBox");
 const resultsBox          = document.getElementById("resultsBox");
 const gradeAgainBtn       = document.getElementById("gradeAgainBtn");
 
+/* ── Grade level selector ── */
+document.querySelectorAll(".grade-level-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".grade-level-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedGrade = btn.dataset.grade;
+  });
+});
+
 /* ── Helpers ── */
 function updateGradeBtn() {
   const ready = rubricFile && workFiles.length > 0;
   gradeBtn.disabled = !ready;
   gradeHint.textContent = ready
-    ? `Ready to grade ${workFiles.length} file(s)`
+    ? `Ready to grade ${workFiles.length} file(s)${selectedGrade ? ` · Grade ${selectedGrade}` : ""}`
     : !rubricFile
       ? "Upload both files to enable grading"
       : "Upload student work to enable grading";
@@ -232,11 +241,10 @@ gradeBtn.addEventListener("click", async () => {
     form.append("rubric", rubricFile, rubricFile.name);
     workFiles.forEach(f => form.append("work_files", f, f.name));
 
-    // Append special instructions if provided
     const instructions = specialInstructions.value.trim();
-    if (instructions) {
-      form.append("special_instructions", instructions);
-    }
+    if (instructions) form.append("special_instructions", instructions);
+
+    if (selectedGrade) form.append("grade_level", selectedGrade);
 
     const resp = await fetch("/grade", { method: "POST", body: form });
     const json = await resp.json();
@@ -267,6 +275,8 @@ gradeAgainBtn.addEventListener("click", () => {
   resultsBox.classList.add("hidden");
   clearRubric();
   workFiles = [];
+  selectedGrade = null;
+  document.querySelectorAll(".grade-level-btn").forEach(b => b.classList.remove("selected"));
   renderWorkList();
   specialInstructions.value = "";
   window.scrollTo({ top: 0, behavior: "smooth" });
