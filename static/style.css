@@ -602,7 +602,7 @@ body {
 
 /* ── Grade level panel ── */
 .grade-level-panel {
-  width: 160px;
+  width: 200px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -621,8 +621,8 @@ body {
 }
 
 .grade-level-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
