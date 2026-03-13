@@ -39,43 +39,63 @@
       <div class="header-badge">Powered by Llama 3</div>
     </header>
 
+    <!-- STEP 01: UPLOAD FILES + GRADE SELECTOR -->
     <div class="section-label">01 — Upload Files</div>
-    <div class="grid">
+    <div class="upload-row">
 
-      <div class="upload-card" id="rubricZone">
-        <input type="file" id="rubricInput" accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
-        <div class="upload-icon-wrap"><div class="upload-icon">📋</div></div>
-        <div class="upload-card-title">Rubric</div>
-        <div class="upload-card-hint" id="rubricHint">Drop your rubric here or<br/><span class="hint-link">browse files</span></div>
-        <div class="upload-formats">.pdf · .txt · .md · and more</div>
-        <div class="file-pill hidden" id="rubricPill">
-          <span class="pill-icon">📄</span>
-          <span id="rubricName"></span>
-          <button id="rubricRemove" class="pill-remove">✕</button>
+      <!-- Left: file drop boxes stacked -->
+      <div class="upload-col">
+        <div class="grid">
+          <div class="upload-card" id="rubricZone">
+            <input type="file" id="rubricInput" accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+            <div class="upload-icon-wrap"><div class="upload-icon">📋</div></div>
+            <div class="upload-card-title">Rubric</div>
+            <div class="upload-card-hint" id="rubricHint">Drop your rubric here or<br/><span class="hint-link">browse files</span></div>
+            <div class="upload-formats">.pdf · .txt · .md · and more</div>
+            <div class="file-pill hidden" id="rubricPill">
+              <span class="pill-icon">📄</span>
+              <span id="rubricName"></span>
+              <button id="rubricRemove" class="pill-remove">✕</button>
+            </div>
+          </div>
+
+          <div class="upload-card" id="workZone">
+            <input type="file" id="workInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+            <div class="upload-icon-wrap"><div class="upload-icon">📝</div></div>
+            <div class="upload-card-title">Student Work</div>
+            <div id="workEmpty">
+              <div class="upload-card-hint">Drop files here or<br/><span class="hint-link">browse files</span></div>
+              <div class="upload-formats">.pdf · .py · .js · .java · .txt · etc.</div>
+            </div>
+            <div id="workFileArea" class="hidden">
+              <div id="workList" class="work-files"></div>
+              <button class="add-more-btn" id="addMoreBtn">
+                <input type="file" id="addMoreInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+                <span>+ Add more files</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="upload-card" id="workZone">
-        <input type="file" id="workInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
-        <div class="upload-icon-wrap"><div class="upload-icon">📝</div></div>
-        <div class="upload-card-title">Student Work</div>
-        <div id="workEmpty">
-          <div class="upload-card-hint">Drop files here or<br/><span class="hint-link">browse files</span></div>
-          <div class="upload-formats">.pdf · .py · .js · .java · .txt · etc.</div>
-        </div>
-        <div id="workFileArea" class="hidden">
-          <div id="workList" class="work-files"></div>
-          <button class="add-more-btn" id="addMoreBtn">
-            <input type="file" id="addMoreInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
-            <span>+ Add more files</span>
-          </button>
+      <!-- Right: grade level selector -->
+      <div class="grade-level-panel">
+        <div class="grade-level-title">Select Grade Level</div>
+        <div class="grade-level-list" id="gradeLevelList">
+          <button class="grade-level-btn" data-grade="6">Grade 6</button>
+          <button class="grade-level-btn" data-grade="7">Grade 7</button>
+          <button class="grade-level-btn" data-grade="8">Grade 8</button>
+          <button class="grade-level-btn" data-grade="9">Grade 9</button>
+          <button class="grade-level-btn" data-grade="10">Grade 10</button>
+          <button class="grade-level-btn" data-grade="11">Grade 11</button>
+          <button class="grade-level-btn" data-grade="12">Grade 12</button>
         </div>
       </div>
 
     </div>
 
-    <!-- SPECIAL INSTRUCTIONS -->
-    <div class="section-label" style="margin-top:24px;">02 — Special Instructions <span class="optional-tag">Optional</span></div>
+    <!-- STEP 02: SPECIAL INSTRUCTIONS -->
+    <div class="section-label" style="margin-top:28px;">02 — Special Instructions <span class="optional-tag">Optional</span></div>
     <div class="instructions-wrap">
       <textarea
         id="specialInstructions"
@@ -86,7 +106,8 @@
       <div class="instructions-hint">These instructions will guide the AI when grading the submission.</div>
     </div>
 
-    <div class="section-label" style="margin-top:24px;">03 — Grade</div>
+    <!-- STEP 03: GRADE -->
+    <div class="section-label" style="margin-top:28px;">03 — Grade</div>
     <div class="grade-wrap">
       <button class="grade-btn" id="gradeBtn" disabled>
         <span class="grade-btn-text">Grade Submission</span>
@@ -144,12 +165,10 @@
       </div>
 
       <div class="results-body">
-
         <div class="result-section" id="criteriaSection">
           <div class="result-section-title"><span class="section-num">01</span> Rubric Breakdown</div>
           <div id="criteriaList" class="criteria-list"></div>
         </div>
-
         <div class="two-col">
           <div class="result-section" id="strengthsSection">
             <div class="result-section-title"><span class="section-num">02</span> Strengths</div>
@@ -160,14 +179,11 @@
             <p class="result-text" id="improvementsText"></p>
           </div>
         </div>
-
         <div class="result-section" id="summarySection">
           <div class="result-section-title"><span class="section-num">04</span> Summary</div>
           <p class="result-text result-summary" id="summaryText"></p>
         </div>
-
         <button class="grade-again-btn" id="gradeAgainBtn">↺ Grade Another Submission</button>
-
       </div>
     </div>
 
