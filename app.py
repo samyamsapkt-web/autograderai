@@ -7,16 +7,14 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB upload limit
+app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 
 
 def extract_text(filename: str, file_bytes: bytes) -> str:
-    """Return plain text from a file, handling PDFs specially."""
     ext = os.path.splitext(filename)[1].lower()
-
     if ext == ".pdf":
         text_parts = []
         with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
@@ -27,11 +25,10 @@ def extract_text(filename: str, file_bytes: bytes) -> str:
         result = "\n\n".join(text_parts)
         if not result.strip():
             raise ValueError(
-                f"Could not extract any text from PDF '{filename}'. "
+                f"Could not extract text from PDF '{filename}'. "
                 "It may be a scanned image-only PDF."
             )
         return result
-
     for encoding in ("utf-8", "latin-1", "cp1252"):
         try:
             return file_bytes.decode(encoding)
@@ -50,14 +47,19 @@ def grade():
     if not GROQ_API_KEY:
         return jsonify({"error": "Server is missing GROQ_API_KEY environment variable."}), 500
 
-    # --- Rubric ---
-    rubric_file = request.files.get("rubric")
-    if not rubric_file:
-        return jsonify({"error": "No rubric file provided."}), 400
-    try:
-        rubric_text = extract_text(rubric_file.filename, rubric_file.read())
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 422
+    # --- Rubric / Answer Key files ---
+    rubric_uploads = request.files.getlist("rubric_files")
+    if not rubric_uploads:
+        return jsonify({"error": "No rubric or answer key file provided."}), 400
+
+    rubric_blocks = []
+    for f in rubric_uploads:
+        try:
+            content = extract_text(f.filename, f.read())
+            rubric_blocks.append(f"=== RUBRIC/ANSWER KEY FILE: {f.filename} ===\n{content}")
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 422
+    rubric_text = "\n\n".join(rubric_blocks)
 
     # --- Student work files ---
     work_uploads = request.files.getlist("work_files")
@@ -68,28 +70,34 @@ def grade():
     for f in work_uploads:
         try:
             content = extract_text(f.filename, f.read())
-            work_blocks.append(f"=== FILE: {f.filename} ===\n{content}")
+            work_blocks.append(f"=== STUDENT FILE: {f.filename} ===\n{content}")
         except ValueError as e:
             return jsonify({"error": str(e)}), 422
-
     work_block = "\n\n".join(work_blocks)
 
-    # --- Grade level (optional) ---
+    # --- Optional fields ---
     grade_level = request.form.get("grade_level", "").strip()
+    special_instructions = request.form.get("special_instructions", "").strip()
+
     grade_block = ""
     if grade_level:
-        grade_block = f"\nGRADE LEVEL: Grade {grade_level}. Evaluate this work strictly based on the expected abilities, writing level, and knowledge of a typical Grade {grade_level} student. Hold them to Grade {grade_level} standards — not higher, not lower.\n"
+        grade_block = f"\nGRADE LEVEL: Grade {grade_level}. Evaluate strictly based on the expected abilities and standards of a typical Grade {grade_level} student.\n"
 
-    # --- Special instructions (optional) ---
-    special_instructions = request.form.get("special_instructions", "").strip()
-    instructions_block = ""
+    instr_block = ""
     if special_instructions:
-        instructions_block = f"\nSPECIAL INSTRUCTIONS FROM TEACHER:\n{special_instructions}\n"
+        instr_block = f"\nSPECIAL INSTRUCTIONS FROM TEACHER:\n{special_instructions}\n"
 
-    # --- Build prompt ---
-    prompt = f"""You are an expert autograder. Grade the student's work based on the rubric provided.
-{grade_block}{instructions_block}
-RUBRIC:
+    prompt = f"""You are an expert teacher grading student work. Your job is to produce highly specific, evidence-based feedback — not generic comments.
+
+CRITICAL RULES FOR FEEDBACK QUALITY:
+1. ALWAYS quote or reference specific parts of the student's work. Use phrases like "In your introduction...", "In paragraph 2...", "Your section on X...", "You write '[quote]' but...". Never give feedback without pointing to exactly where in the work the issue or strength appears.
+2. NEVER use vague phrases like "could be better", "needs improvement", "good job", "well done". Replace every vague phrase with a specific observation tied to actual content.
+3. For each criterion, explain your REASONING — why did you assign that score? What specific evidence in the work supports it?
+4. Use varied, precise language. Rotate between: "notably", "specifically", "for instance", "your analysis of X", "the section where you discuss Y", "this is effective because", "this weakens the argument because".
+5. If an answer key is provided, check each answer against it explicitly. Note correct answers, partially correct answers, and incorrect answers with specifics.
+6. Calculate the final score using weighted categories if the rubric specifies weights/percentages.
+{grade_block}{instr_block}
+RUBRIC / ANSWER KEY:
 {rubric_text}
 
 STUDENT WORK:
@@ -98,19 +106,24 @@ STUDENT WORK:
 Respond ONLY with a JSON object in this exact format (no markdown, no backticks):
 {{
   "score": <number 0-100>,
-  "letter": "<A/B/C/D/F>",
+  "letter": "<A+/A/A-/B+/B/B-/C+/C/C-/D/F>",
+  "confidence": <number 0-100>,
+  "confidence_label": "<High|Moderate|Low>",
+  "confidence_note": "<one sentence explaining confidence level, e.g. 'Rubric is detailed and work is clear — high confidence in this assessment'>",
+  "grading_logic": "<explain how the final score was calculated, e.g. 'Knowledge 24/30 (80%) + Thinking 20/25 (80%) + Communication 18/25 (72%) = weighted average of 78%'>",
   "criteria": [
     {{
       "name": "<criterion name>",
+      "weight": "<e.g. 30% or N/A>",
       "points_earned": <number>,
       "points_possible": <number>,
       "status": "<pass|partial|fail>",
-      "feedback": "<specific feedback>"
+      "feedback": "<SPECIFIC feedback referencing exact parts of the student work — quote or reference specific paragraphs, sentences, or sections. Explain WHY this score was given with evidence.>"
     }}
   ],
-  "strengths": "<paragraph about what the student did well>",
-  "improvements": "<paragraph about what needs work>",
-  "summary": "<overall 2-3 sentence summary>"
+  "strengths": "<Specific paragraph referencing actual content — name the sections, quote phrases, explain WHY they are strong>",
+  "improvements": "<Specific paragraph with exact locations in the work — 'In your conclusion...', 'Your paragraph on X lacks...', 'The sentence where you say Y could be strengthened by...'>",
+  "summary": "<2-3 sentence honest overall summary that references the actual work>"
 }}"""
 
     headers = {
@@ -121,7 +134,7 @@ Respond ONLY with a JSON object in this exact format (no markdown, no backticks)
     payload = {
         "model": "llama-3.3-70b-versatile",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 1500,
+        "max_tokens": 2000,
         "temperature": 0.2,
     }
 
@@ -132,9 +145,7 @@ Respond ONLY with a JSON object in this exact format (no markdown, no backticks)
         text = result["choices"][0]["message"]["content"]
         return jsonify({"result": text})
     except requests.exceptions.HTTPError as e:
-        return jsonify({
-            "error": f"Groq API error: {e.response.status_code} — {e.response.text}"
-        }), 502
+        return jsonify({"error": f"Groq API error: {e.response.status_code} — {e.response.text}"}), 502
     except requests.exceptions.Timeout:
         return jsonify({"error": "Request to Groq timed out."}), 504
     except Exception as e:
