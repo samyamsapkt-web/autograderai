@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Signing in...</title>
+  <style>
+    body { background:#080c14; color:#e2e8f0; font-family:'Outfit',sans-serif;
+           display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+    .msg { text-align:center; }
+    .spinner { width:36px;height:36px; border:3px solid rgba(129,140,248,0.2);
+               border-top-color:#818cf8; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+    p { color:#64748b; font-size:14px; }
+  </style>
+</head>
+<body>
+  <div class="msg">
+    <div class="spinner"></div>
+    <p>Completing sign in...</p>
+  </div>
+  <script>
+    // Supabase puts the session in the URL hash after OAuth
+    const hash   = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const token  = params.get("access_token");
+
+    if (token) {
+      fetch("/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ access_token: token })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) window.location.href = "/";
+        else document.querySelector("p").textContent = "Sign in failed: " + (data.error || "unknown error");
+      });
+    } else {
+      document.querySelector("p").textContent = "No token found. Please try again.";
+      setTimeout(() => window.location.href = "/", 3000);
+    }
+  </script>
+</body>
+</html>

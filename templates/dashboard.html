@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AutoGrader AI — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <div class="app">
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M14 2L24 8V20L14 26L4 20V8L14 2Z" stroke="url(#grad)" stroke-width="1.5" fill="none"/>
+            <path d="M14 7L19 10V16L14 19L9 16V10L14 7Z" fill="url(#grad)" opacity="0.6"/>
+            <defs>
+              <linearGradient id="grad" x1="4" y1="2" x2="24" y2="26" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <div class="logo">AutoGrader <span class="logo-ai">AI</span></div>
+          <div class="tagline">Intelligent Assignment Evaluation</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <nav class="nav">
+          <a class="nav-link" href="/">Grading</a>
+          <a class="nav-link active" href="/dashboard">Dashboard</a>
+        </nav>
+        <div class="auth-area" id="authArea"></div>
+      </div>
+    </header>
+
+    <!-- ── DASHBOARD HERO ── -->
+    <div class="dash-hero">
+      <div>
+        <div class="section-label">Your Grading History</div>
+        <h2 class="dash-title">Dashboard</h2>
+      </div>
+      <div class="dash-stats" id="dashStats">
+        <div class="stat-card">
+          <div class="stat-num" id="statTotal">—</div>
+          <div class="stat-label">Total Graded</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statAvg">—</div>
+          <div class="stat-label">Avg Score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statHigh">—</div>
+          <div class="stat-label">Highest Score</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FILTER BAR ── -->
+    <div class="filter-bar">
+      <input type="text" class="filter-input" id="filterInput" placeholder="Search by file name or grade..."/>
+      <select class="filter-select" id="filterGrade">
+        <option value="">All Grades</option>
+        <option>Grade 6</option><option>Grade 7</option><option>Grade 8</option>
+        <option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option>
+      </select>
+      <select class="filter-select" id="filterSort">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="highest">Highest Score</option>
+        <option value="lowest">Lowest Score</option>
+      </select>
+    </div>
+
+    <!-- ── GRADES LIST ── -->
+    <div id="gradesLoading" class="dash-loading">
+      <div class="spinner"></div>
+      <span>Loading your grades...</span>
+    </div>
+
+    <div id="gradesEmpty" class="dash-empty hidden">
+      <div class="dash-empty-icon">📋</div>
+      <div class="dash-empty-title">No grades yet</div>
+      <div class="dash-empty-sub">Grade your first assignment to see it here.</div>
+      <a href="/" class="dash-empty-btn">Go to Grading →</a>
+    </div>
+
+    <div id="gradesList" class="grades-list hidden"></div>
+
+    <!-- ── DETAIL MODAL ── -->
+    <div class="detail-overlay hidden" id="detailOverlay">
+      <div class="detail-modal">
+        <div class="detail-header">
+          <div class="detail-title" id="detailTitle">Grade Detail</div>
+          <button class="detail-close" id="detailClose">✕</button>
+        </div>
+        <div class="detail-body" id="detailBody"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/dashboard.js"></script>
+</body>
+</html>
