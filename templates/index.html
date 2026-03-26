@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoGrader AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AutoGrader AI — Grading</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
 <body>
 
@@ -17,6 +17,7 @@
 
   <div class="app">
 
+    <!-- ── HEADER ── -->
     <header class="header">
       <div class="logo-wrap">
         <div class="logo-icon">
@@ -36,18 +37,27 @@
           <div class="tagline">Intelligent Assignment Evaluation</div>
         </div>
       </div>
-      <div class="header-badge">Powered by Llama 3</div>
+
+      <!-- Nav + auth -->
+      <div class="header-right">
+        <nav class="nav">
+          <a class="nav-link active" href="/">Grading</a>
+          <a class="nav-link" href="/dashboard">Dashboard</a>
+        </nav>
+        <div class="auth-area" id="authArea">
+          <!-- Filled by JS -->
+        </div>
+      </div>
     </header>
 
-    <!-- STEP 01 -->
+    <!-- ── STEP 01 ── -->
     <div class="section-label">01 — Upload Files</div>
     <div class="upload-row">
       <div class="upload-col">
         <div class="grid">
 
-          <!-- Rubric / Answer Key -->
           <div class="upload-card" id="rubricZone">
-            <input type="file" id="rubricInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+            <input type="file" id="rubricInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv"/>
             <div class="upload-icon-wrap"><div class="upload-icon">📋</div></div>
             <div class="upload-card-title">Rubric / Answer Key</div>
             <div id="rubricEmpty">
@@ -57,15 +67,14 @@
             <div id="rubricFileArea" class="hidden">
               <div id="rubricList" class="work-files"></div>
               <button class="add-more-btn" id="addMoreRubricBtn">
-                <input type="file" id="addMoreRubricInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+                <input type="file" id="addMoreRubricInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv"/>
                 <span>+ Add more</span>
               </button>
             </div>
           </div>
 
-          <!-- Student Work -->
           <div class="upload-card" id="workZone">
-            <input type="file" id="workInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+            <input type="file" id="workInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv"/>
             <div class="upload-icon-wrap"><div class="upload-icon">📝</div></div>
             <div class="upload-card-title">Student Work</div>
             <div id="workEmpty">
@@ -75,7 +84,7 @@
             <div id="workFileArea" class="hidden">
               <div id="workList" class="work-files"></div>
               <button class="add-more-btn" id="addMoreBtn">
-                <input type="file" id="addMoreInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv" />
+                <input type="file" id="addMoreInput" multiple accept=".pdf,.txt,.md,.py,.js,.java,.html,.css,.json,.csv"/>
                 <span>+ Add more files</span>
               </button>
             </div>
@@ -84,10 +93,9 @@
         </div>
       </div>
 
-      <!-- Grade level -->
       <div class="grade-level-panel">
         <div class="grade-level-title">Select Grade Level</div>
-        <div class="grade-level-list" id="gradeLevelList">
+        <div class="grade-level-list">
           <button class="grade-level-btn" data-grade="6">Grade 6</button>
           <button class="grade-level-btn" data-grade="7">Grade 7</button>
           <button class="grade-level-btn" data-grade="8">Grade 8</button>
@@ -99,15 +107,15 @@
       </div>
     </div>
 
-    <!-- STEP 02 -->
+    <!-- ── STEP 02 ── -->
     <div class="section-label" style="margin-top:28px;">02 — Special Instructions <span class="optional-tag">Optional</span></div>
     <div class="instructions-wrap">
       <textarea id="specialInstructions" class="instructions-input" rows="3"
-        placeholder="Add grading notes or exceptions... e.g. 'If the student has the correct answer but not exact wording from the answer key, still give full marks'"></textarea>
+        placeholder="Add grading notes... e.g. 'If the student has the correct answer but not exact wording, still give full marks'"></textarea>
       <div class="instructions-hint">These instructions will guide the AI when grading.</div>
     </div>
 
-    <!-- STEP 03 -->
+    <!-- ── STEP 03 ── -->
     <div class="section-label" style="margin-top:28px;">03 — Grade</div>
     <div class="grade-wrap">
       <button class="grade-btn" id="gradeBtn" disabled>
@@ -137,10 +145,9 @@
       </div>
     </div>
 
-    <!-- RESULTS -->
+    <!-- ── RESULTS ── -->
     <div class="results-card hidden" id="resultsBox">
 
-      <!-- Score hero -->
       <div class="score-hero">
         <div class="score-ring-wrap">
           <svg class="score-ring" viewBox="0 0 120 120">
@@ -161,16 +168,13 @@
           </div>
         </div>
         <div class="score-details">
-          <!-- Editable grade -->
           <div class="grade-edit-wrap">
             <div class="letter-grade" id="letterGrade">—</div>
             <button class="edit-grade-btn" id="editGradeBtn" title="Edit grade">✏️</button>
           </div>
           <div class="score-title">Evaluation Report</div>
           <div class="score-subtitle" id="scoreSubtitle"></div>
-
-          <!-- Confidence -->
-          <div class="confidence-wrap" id="confidenceWrap">
+          <div class="confidence-wrap">
             <div class="confidence-bar-track">
               <div class="confidence-bar-fill" id="confidenceBar"></div>
             </div>
@@ -180,18 +184,17 @@
         </div>
       </div>
 
-      <!-- Edit grade modal -->
       <div class="edit-modal hidden" id="editModal">
         <div class="edit-modal-inner">
           <div class="edit-modal-title">Override Grade</div>
           <div class="edit-modal-row">
             <div class="edit-field">
               <label>Score (0–100)</label>
-              <input type="number" id="editScore" min="0" max="100" class="edit-input" />
+              <input type="number" id="editScore" min="0" max="100" class="edit-input"/>
             </div>
             <div class="edit-field">
               <label>Letter Grade</label>
-              <input type="text" id="editLetter" maxlength="3" class="edit-input" placeholder="e.g. B+" />
+              <input type="text" id="editLetter" maxlength="3" class="edit-input" placeholder="e.g. B+"/>
             </div>
           </div>
           <div class="edit-modal-actions">
@@ -201,21 +204,16 @@
         </div>
       </div>
 
-      <!-- Grading logic -->
-      <div class="logic-bar" id="logicBar">
+      <div class="logic-bar hidden" id="logicBar">
         <span class="logic-icon">⚖</span>
         <span id="logicText"></span>
       </div>
 
       <div class="results-body">
-
-        <!-- Criteria breakdown -->
         <div class="result-section" id="criteriaSection">
           <div class="result-section-title"><span class="section-num">01</span> Rubric Breakdown</div>
           <div id="criteriaList" class="criteria-list"></div>
         </div>
-
-        <!-- Strengths & Improvements -->
         <div class="two-col">
           <div class="result-section" id="strengthsSection">
             <div class="result-section-title"><span class="section-num">02</span> Strengths</div>
@@ -228,29 +226,24 @@
             <button class="edit-text-btn" data-target="improvementsText">✏️ Edit</button>
           </div>
         </div>
-
-        <!-- Summary -->
         <div class="result-section" id="summarySection">
           <div class="result-section-title"><span class="section-num">04</span> Summary</div>
           <p class="result-text result-summary editable-text" id="summaryText" contenteditable="false"></p>
           <button class="edit-text-btn" data-target="summaryText">✏️ Edit</button>
         </div>
-
-        <!-- Teacher approve bar -->
-        <div class="approve-bar" id="approveBar">
+        <div class="approve-bar">
           <div class="approve-bar-left">
             <div class="approve-status" id="approveStatus">
               <span class="approve-dot pending"></span>
               Pending teacher review
             </div>
-            <div class="approve-note">Review and edit any feedback above before approving.</div>
+            <div class="approve-note">Review and edit feedback above before approving.</div>
           </div>
           <div class="approve-bar-right">
             <button class="grade-again-btn" id="gradeAgainBtn">↺ Grade Another</button>
             <button class="approve-btn" id="approveBtn">✓ Approve &amp; Print</button>
           </div>
         </div>
-
       </div>
     </div>
 
